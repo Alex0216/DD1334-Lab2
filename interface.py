@@ -131,7 +131,25 @@ class DBContext:
         """Removes tuples.
         Will query the user for the information required to identify a tuple.
         If the filter field is left blank, no filters will be used."""
-        pass
+        
+        #Get the table containing the row to be deleted
+        table = raw_input("Choose table: ").strip()
+        print table
+
+        #Now we get the filters
+        filters = raw_input("Apply filters: ")
+        
+        #try the query
+        try:
+            query = """ DELETE FROM %s%s;"""%(table, "" if filters == "" else " WHERE %s"%filters)
+        except (NameError, ValueError, TypeError, SyntaxError):
+            print " Bad input."
+            return
+        print query
+
+        #Then we execute the query
+        self.cur.execute(query)
+        self.print_answer()
 
     def insert(self):
         """inserts tuples.
