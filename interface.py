@@ -31,7 +31,8 @@ class DBContext:
 # we need to call the connect function with the right parameters some
 # of wheich we 'hard code here such as the host, wnd others we call
 # the built in python function raw_input to get from the user.  All are stored in a variable that we chose to call params.
-        params = {'host':'nestor2.csc.kth.se', 'user':raw_input("Username: "), 'database':raw_input("Database: "), 'password':raw_input("Password: ")}
+       # params = {'host':'nestor2.csc.kth.se', 'user':raw_input("Username: "), 'database':raw_input("Database: "), 'password':raw_input("Password: ")}
+        params = {'host':'nestor2.csc.kth.se', 'user':'aleso', 'database':'aleso', 'password':'YvlleTYh'}
         self.conn = pgdb.connect(**params)
         # Here we create an attribute of our class (DBContex) called
         # menu as a list of strings.
@@ -155,6 +156,29 @@ class DBContext:
         """inserts tuples.
         Will query the user for the information required to create tuples."""
         pass    
+        #Get the table containing the row to be deleted
+        table = raw_input("Choose table: ").strip()
+        print table
+
+        # here columns becomes the string that you type at prompt for Choose columns.
+        columns = raw_input("Choose column(s): ")
+        print columns
+
+        #ask for the values
+        values = raw_input('values: ')
+
+        try:
+            query = """INSERT INTO %s(%s) VALUES (%s);"""%(table, columns, values)
+        except (NameError, ValueError, TypeError, SyntaxError):
+            print " Bad Input."
+            return
+
+        print query
+        
+        #Then we execute the query
+        self.cur.execute(query)
+        self.print_answer()
+    
     def exit(self):    
         self.cur.close()
         self.conn.close()
