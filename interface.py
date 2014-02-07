@@ -31,8 +31,7 @@ class DBContext:
 # we need to call the connect function with the right parameters some
 # of wheich we 'hard code here such as the host, wnd others we call
 # the built in python function raw_input to get from the user.  All are stored in a variable that we chose to call params.
-       # params = {'host':'nestor2.csc.kth.se', 'user':raw_input("Username: "), 'database':raw_input("Database: "), 'password':raw_input("Password: ")}
-        params = {'host':'nestor2.csc.kth.se', 'user':'aleso', 'database':'aleso', 'password':'YvlleTYh'}
+        params = {'host':'nestor2.csc.kth.se', 'user':raw_input("Username: "), 'database':raw_input("Database: "), 'password':raw_input("Password: ")}
         self.conn = pgdb.connect(**params)
         # Here we create an attribute of our class (DBContex) called
         # menu as a list of strings.
