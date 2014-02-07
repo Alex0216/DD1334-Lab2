@@ -73,13 +73,13 @@ class DBContext:
  
         # ID should be hard typed to an integer
         #  So think that they can enter: 1 OR 1=1  
-        ID = raw_input("cutomerID: ")
+        ID = int(input("ID: "))
         # These names inputs are terrible and allow injection attacks.
         #  So think that they can enter: Hilbert' OR 'a'='a  
         fname= (raw_input("First Name: ").strip())
         lname= raw_input("Last Name: ").strip()
         # THIS IS NOT RIGHT YOU MUST FIGURE OUT WHAT QUERY MAKES SENSE
-        query ="SELECT something FROM somewhere WHERE something"
+        query ="SELECT first_name, last_name FROM customers WHERE customer_id = '%s';"%(ID) 
         print query
 
 
@@ -89,10 +89,16 @@ class DBContext:
         # test code here... 
         # HINT: in pyton lists are accessed from 0 that is mylist[0] is the first element
         # also a list of a list (such as the result of a query) has two indecies so starts with mylist[0][0]  
-        # now the test is done
-        print "good name"
+        result = self.cur.fetchone()
+        if result[0] == fname and result[1] == lname:
+            # now the test is done
+            print "good name"
         # THIS IS NOT RIGHT YOU MUST PRINT OUT a listing of shipment_id,ship_date,isbn,title for this customer
-        query ="SELECT something FROM somewhere WHERE conditions"
+        else:
+            print "NOPE"
+            return
+        
+        query ="SELECT shipment_id, isbn, ship_date FROM shipments WHERE customer_id = %s"%(ID)
        
         # YOU MUST CATCH EXCEPTIONS HERE AGAIN
         self.cur.execute(query)
@@ -108,6 +114,7 @@ class DBContext:
         exit()
 
     def print_answer(self):
+            print "ship_id  isbn   ship date"
             print("\n".join([", ".join([str(a) for a in x]) for x in self.cur.fetchall()]))
 
     def run(self):
