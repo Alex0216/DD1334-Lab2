@@ -93,7 +93,7 @@ class DBContext:
         # the words " natural join " are added to the long string
         # being defined and stored in the variable tables.
 
-        tables = [x.strip() + " natural join " for x in raw_input("Choose table(s): ").split(",")]
+        tables = [x.strip() + " natural join " for x in pgdb.escape_string(raw_input("Choose table(s): ")).split(",")]
 
 # Here we do some char pointer tricks to remove the extra " natural
 # join " (14 characters
@@ -101,7 +101,7 @@ class DBContext:
 # pring the result to the screen
         print tables
 # here columns becomes the string that you type at prompt for Choose columns.
-        columns = raw_input("Choose column(s): ")
+        columns = pgdb.escape_string(raw_input("Choose column(s): "))
         print columns
         #list comprehension building a list ready to be reduced into a string.
         filters = raw_input("Apply filters: ")
@@ -133,7 +133,7 @@ class DBContext:
         If the filter field is left blank, no filters will be used."""
         
         #Get the table containing the row to be deleted
-        table = raw_input("Choose table: ").strip()
+        table = pgdb.escape_string(raw_input("Choose table: ").strip())
         print table
 
         #Now we get the filters
@@ -149,18 +149,18 @@ class DBContext:
 
         #Then we execute the query
         self.cur.execute(query)
-        self.print_answer()
+#        self.print_answer()
 
     def insert(self):
         """inserts tuples.
         Will query the user for the information required to create tuples."""
         pass    
         #Get the table containing the row to be deleted
-        table = raw_input("Choose table: ").strip()
+        table = pgdb.escape_string(raw_input("Choose table: ").strip())
         print table
 
         # here columns becomes the string that you type at prompt for Choose columns.
-        columns = raw_input("Choose column(s): ")
+        columns = pgdb.escape_string(raw_input("Choose column(s): "))
         print columns
 
         #ask for the values
@@ -176,7 +176,7 @@ class DBContext:
         
         #Then we execute the query
         self.cur.execute(query)
-        self.print_answer()
+#        self.print_answer()
     
     def exit(self):    
         self.cur.close()
