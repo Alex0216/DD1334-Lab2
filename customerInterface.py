@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import pgdb
+import pgdb, pg
 from sys import argv
 #  Here you shall complete the code to allow a customer to use this interface to check his or her shipments.
 #  You will fill in the 'shipments' funtion 
@@ -72,36 +72,54 @@ class DBContext:
         # These input funtions are not correct so  exceptions caught and handled.
  
         # ID should be hard typed to an integer
-        #  So think that they can enter: 1 OR 1=1  
-        ID = int(input("ID: "))
+        #  So think that they can enter: 1 OR 1=1
+
+        while True:
+            try:
+                ID = int(input("ID: "))
+                break
+            except NameError:
+                print "Please enter a number"
+
         # These names inputs are terrible and allow injection attacks.
         #  So think that they can enter: Hilbert' OR 'a'='a  
         fname= (raw_input("First Name: ").strip())
         lname= raw_input("Last Name: ").strip()
         # THIS IS NOT RIGHT YOU MUST FIGURE OUT WHAT QUERY MAKES SENSE
         query ="SELECT first_name, last_name FROM customers WHERE customer_id = '%s';"%(ID) 
-        print query
-
 
         #NEED TO Catch excemptions ie bad queries  (ie there are pgdb.someError type errors codes)
-        self.cur.execute(query)
+        try:
+            self.cur.execute(query)
+        except pg.ProgrammingError as detail:
+            print "Something is not right... please try again"
+
         # NEED TO figure out how to get and test the output to see if the customer is in customers
         # test code here... 
         # HINT: in pyton lists are accessed from 0 that is mylist[0] is the first element
         # also a list of a list (such as the result of a query) has two indecies so starts with mylist[0][0]  
         result = self.cur.fetchone()
-        if result[0] == fname and result[1] == lname:
-            # now the test is done
-            print "good name"
-        # THIS IS NOT RIGHT YOU MUST PRINT OUT a listing of shipment_id,ship_date,isbn,title for this customer
+        if result:
+            if result[0].lower() == fname.lower() and result[1].lower() == lname.lower():
+                # now the test is done
+                print "Welcome %s %s"%(fname, lname)
+            # THIS IS NOT RIGHT YOU MUST PRINT OUT a listing of shipment_id,ship_date,isbn,title for this customer
+            else:
+                print "The ID does not match with the name you entered"
+                return
         else:
-            print "NOPE"
+            print "Sorry we could no find the ID in the database"
             return
         
-        query ="SELECT shipment_id, isbn, ship_date FROM shipments WHERE customer_id = %s"%(ID)
+        query = """SELECT shipment_id, ship_date, isbn, title
+                   FROM shipments NATURAL JOIN editions NATURAL JOIN books
+                   WHERE customer_id = %s"""%(ID)
        
         # YOU MUST CATCH EXCEPTIONS HERE AGAIN
-        self.cur.execute(query)
+        try:
+            self.cur.execute(query)
+        except pg.ProgrammingError as detail:
+            print detail
         # Here the list should print for example:  
         #    Customer 860 Tim Owens:
         #    shipment_id,ship_date,isbn,title
@@ -114,7 +132,7 @@ class DBContext:
         exit()
 
     def print_answer(self):
-            print "ship_id  isbn   ship date"
+            print "ship_id     ship date    isbn        title"
             print("\n".join([", ".join([str(a) for a in x]) for x in self.cur.fetchall()]))
 
     def run(self):
