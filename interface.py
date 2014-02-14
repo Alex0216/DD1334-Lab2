@@ -13,6 +13,7 @@
 # https://wiki.inf.ed.ac.uk/twiki/pub/DatabaseGroup/TeachingPythonPostgreGuide/dbexample.py.txt
 
 import pgdb
+import pg
 from sys import argv
 
 # we define a class that we will use in our main program
@@ -120,12 +121,16 @@ class DBContext:
         except (NameError,ValueError, TypeError,SyntaxError):
             print "  Bad input."
             return
+
         print(query)
         # Here we do the select query at the cursor
         # No errors are caught so this crashes horribly on malformed queries
-        self.cur.execute(query)       
-        # This function is defined below
-        self.print_answer()
+        try:
+            self.cur.execute(query)
+            # This function is defined below
+            self.print_answer()
+        except pg.ProgrammingError as detail:
+            print detail.message.split('\n')[0]
         #OK now you do the next two:
     def remove(self):
         """Removes tuples.
@@ -148,8 +153,11 @@ class DBContext:
         print query
 
         #Then we execute the query
-        self.cur.execute(query)
-#        self.print_answer()
+        try:
+            self.cur.execute(query)
+        except pg.ProgrammingError as detail:
+            print detail.message.split('\n')[0]
+
 
     def insert(self):
         """inserts tuples.
@@ -175,8 +183,10 @@ class DBContext:
         print query
         
         #Then we execute the query
-        self.cur.execute(query)
-#        self.print_answer()
+        try:
+            self.cur.execute(query)
+        except pg.ProgrammingError as detail:
+            print detail.message.split('\n')[0]
     
     def exit(self):    
         self.cur.close()
