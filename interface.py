@@ -21,18 +21,19 @@ class DBContext:
     """DBContext is a small interface to a database that simplifies SQL.
     Each function gathers the minimal amount of information required and executes the query."""
 
-# we first define the class, its definitions, functions attributes,
-# members ... what ever you like to call this stuff.  Then way down at
-# the bottom of this file we will create on of these.
-# this __init___ operation is automatically called when the object is created.
+    # we first define the class, its definitions, functions attributes,
+    # members ... what ever you like to call this stuff.  Then way down at
+    # the bottom of this file we will create on of these.
+    # this __init___ operation is automatically called when the object is created.
 
-    def __init__(self): #PG-connection setup
+    def __init__(self):  #PG-connection setup
         print("AUTHORS NOTE: If you submit faulty information here, I am not responsible for the consequences.")
 
-# we need to call the connect function with the right parameters some
-# of wheich we 'hard code here such as the host, wnd others we call
-# the built in python function raw_input to get from the user.  All are stored in a variable that we chose to call params.
-        params = {'host':'nestor2.csc.kth.se', 'user':raw_input("Username: "), 'database':raw_input("Database: "), 'password':raw_input("Password: ")}
+        # we need to call the connect function with the right parameters some
+        # of wheich we 'hard code here such as the host, wnd others we call
+        # the built in python function raw_input to get from the user.  All are stored in a variable that we chose to call params.
+        params = {'host': 'nestor2.csc.kth.se', 'user': raw_input("Username: "), 'database': raw_input("Database: "),
+                  'password': raw_input("Password: ")}
         self.conn = pgdb.connect(**params)
         # Here we create an attribute of our class (DBContex) called
         # menu as a list of strings.
@@ -41,11 +42,11 @@ class DBContext:
         # http://www.python.org/dev/peps/pep-0249/
         self.cur = self.conn.cursor()
 
-# Here we define a member function that we can later call repeatidly
+    # Here we define a member function that we can later call repeatidly
     def print_menu(self):
         """Prints a menu of all functions this program offers.  Returns the numerical correspondant of the choice made."""
-        for i,x in enumerate(self.menu):
-            print("%i. %s"%(i+1,x))
+        for i, x in enumerate(self.menu):
+            print("%i. %s" % (i + 1, x))
             # this get_int function is defined below
         return self.get_int()
 
@@ -55,20 +56,20 @@ class DBContext:
         while True:
             # we go round here untill we get to return (ie while True)
 
-          #  The try statement works as follows.  First, the try
-          #  clause (the statement(s) between the try and except
-          #  keywords) is executed. If no exception occurs, the except
-          #  clause is skipped and execution of the try statement is
-          #  finished. If an exception occurs during execution of the
-          #  try clause, the rest of the clause is skipped. Then if
-          #  its type matches the exception named after the except
-          #  keyword, the except clause is executed, and then
-          #  execution continues after the try statement.  If an
-          #  exception occurs which does not match the exception named
-          #  in the except clause, it is passed on to outer try
-          #  statements; if no handler is found, it is an unhandled
-          #  exception and execution stops with a message as shown
-          #  above.
+            #  The try statement works as follows.  First, the try
+            #  clause (the statement(s) between the try and except
+            #  keywords) is executed. If no exception occurs, the except
+            #  clause is skipped and execution of the try statement is
+            #  finished. If an exception occurs during execution of the
+            #  try clause, the rest of the clause is skipped. Then if
+            #  its type matches the exception named after the except
+            #  keyword, the except clause is executed, and then
+            #  execution continues after the try statement.  If an
+            #  exception occurs which does not match the exception named
+            #  in the except clause, it is passed on to outer try
+            #  statements; if no handler is found, it is an unhandled
+            #  exception and execution stops with a message as shown
+            #  above.
             try:
                 # an Error here (ie wrong input type) jumps to except
                 choice = int(input("Choose: "))
@@ -76,10 +77,11 @@ class DBContext:
                     return choice
                 # here we had a number but it was out of range
                 print("Invalid choice.")
-            except (NameError,ValueError, TypeError, SyntaxError):
+            except (NameError, ValueError, TypeError, SyntaxError):
                 print("That was not a number, genious.... :(")
 
                 # This function will be called if the user choses select.
+
     def select(self):
         """Finds and prints tuples.
         Will query the user for the information required to identify a tuple.
@@ -96,12 +98,12 @@ class DBContext:
 
         tables = [x.strip() + " natural join " for x in pgdb.escape_string(raw_input("Choose table(s): ")).split(",")]
 
-# Here we do some char pointer tricks to remove the extra " natural
-# join " (14 characters
-        tables[len(tables)-1] = tables[len(tables)-1][0:len(tables[len(tables)-1])-14]
-# pring the result to the screen
+        # Here we do some char pointer tricks to remove the extra " natural
+        # join " (14 characters
+        tables[len(tables) - 1] = tables[len(tables) - 1][0:len(tables[len(tables) - 1]) - 14]
+        # pring the result to the screen
         print tables
-# here columns becomes the string that you type at prompt for Choose columns.
+        # here columns becomes the string that you type at prompt for Choose columns.
         columns = pgdb.escape_string(raw_input("Choose column(s): "))
         print columns
         #list comprehension building a list ready to be reduced into a string.
@@ -117,8 +119,8 @@ class DBContext:
         #   (iterable) (here each element of columns is taken as b in turn 
         # join is the python way to concatenate a list of strings
         try:
-            query = """SELECT %s FROM %s%s;"""%(reduce(lambda a,b:a+b,columns), "".join(tables), "" if filters == "" else " WHERE %s"%filters)
-        except (NameError,ValueError, TypeError,SyntaxError):
+            query = """SELECT %s FROM %s%s;""" % (reduce(lambda a, b: a + b, columns), "".join(tables), "" if filters == "" else " WHERE %s" % filters)
+        except (NameError, ValueError, TypeError, SyntaxError):
             print "  Bad input."
             return
 
@@ -131,22 +133,23 @@ class DBContext:
             self.print_answer()
         except pg.ProgrammingError as detail:
             print detail.message.split('\n')[0]
-        #OK now you do the next two:
+            #OK now you do the next two:
+
     def remove(self):
         """Removes tuples.
         Will query the user for the information required to identify a tuple.
         If the filter field is left blank, no filters will be used."""
-        
+
         #Get the table containing the row to be deleted
         table = pgdb.escape_string(raw_input("Choose table: ").strip())
         print table
 
         #Now we get the filters
-        filters = raw_input("Apply filters: ")
-        
+        filters = pgdb.escape_string(raw_input("Apply filters: "))
+
         #try the query
         try:
-            query = """ DELETE FROM %s%s;"""%(table, "" if filters == "" else " WHERE %s"%filters)
+            query = """ DELETE FROM %s%s;""" % (table, "" if filters == "" else " WHERE %s" % filters)
         except (NameError, ValueError, TypeError, SyntaxError):
             print " Bad input."
             return
@@ -162,7 +165,7 @@ class DBContext:
     def insert(self):
         """inserts tuples.
         Will query the user for the information required to create tuples."""
-        pass    
+        pass
         #Get the table containing the row to be deleted
         table = pgdb.escape_string(raw_input("Choose table: ").strip())
         print table
@@ -172,30 +175,30 @@ class DBContext:
         print columns
 
         #ask for the values
-        values = raw_input('values: ')
+        values = pgdb.escape_string(raw_input('values: '))
 
         try:
-            query = """INSERT INTO %s(%s) VALUES (%s);"""%(table, columns, values)
-        except (NameError, ValueError, TypeError, SyntaxError):
-            print " Bad Input."
+            query = """INSERT INTO %s(%s) VALUES (%s);""" % (table, columns, values)
+        except (NameError, ValueError, TypeError, SyntaxError) as e:
+            print " Bad Input: " + e
             return
 
         print query
-        
+
         #Then we execute the query
         try:
             self.cur.execute(query)
         except pg.ProgrammingError as detail:
             print detail.message.split('\n')[0]
-    
-    def exit(self):    
+
+    def exit(self):
         self.cur.close()
         self.conn.close()
         exit()
-    
+
     def print_answer(self):
-# We print all the stuff that was just fetched.
-            print("\n".join([", ".join([str(a) for a in x]) for x in self.cur.fetchall()]))
+        # We print all the stuff that was just fetched.
+        print("\n".join([", ".join([str(a) for a in x]) for x in self.cur.fetchall()]))
 
     # we call this below in the main function.
     def run(self):
@@ -208,10 +211,10 @@ class DBContext:
                 # function is run first (defined above), then the
                 # return value is used as an index into the list
                 # actions defined above, then that action is called.
-                actions[self.print_menu()-1]()
+                actions[self.print_menu() - 1]()
                 print
             except IndexError:
-# if somehow the index into actions is wrong we just loop back
+                # if somehow the index into actions is wrong we just loop back
                 print("Bad choice")
 
 # This strange looking line is what kicks it all off.  So python reads until it sees this then starts executing what comes after-

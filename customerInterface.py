@@ -53,7 +53,7 @@ class DBContext:
     def print_menu(self):
         """Prints a menu of all functions this program offers.  Returns the numerical correspondant of the choice made."""
         for i,x in enumerate(self.menu):
-            print("%i. %s"%(i+1,x))
+            print("%i. %s" % (i+1, x))
         return self.get_int()
 
     def get_int(self):
@@ -83,10 +83,10 @@ class DBContext:
 
         # These names inputs are terrible and allow injection attacks.
         #  So think that they can enter: Hilbert' OR 'a'='a  
-        fname= (raw_input("First Name: ").strip())
-        lname= raw_input("Last Name: ").strip()
+        fname = pgdb.escape_string(raw_input("First Name: ").strip())
+        lname = pgdb.escape_string(raw_input("Last Name: ").strip())
         # THIS IS NOT RIGHT YOU MUST FIGURE OUT WHAT QUERY MAKES SENSE
-        query ="SELECT first_name, last_name FROM customers WHERE customer_id = '%s';"%(ID) 
+        query = "SELECT first_name, last_name FROM customers WHERE customer_id = '%s';" %(ID)
 
         #NEED TO Catch excemptions ie bad queries  (ie there are pgdb.someError type errors codes)
         try:
@@ -96,13 +96,13 @@ class DBContext:
 
         # NEED TO figure out how to get and test the output to see if the customer is in customers
         # test code here... 
-        # HINT: in pyton lists are accessed from 0 that is mylist[0] is the first element
-        # also a list of a list (such as the result of a query) has two indecies so starts with mylist[0][0]  
+        # HINT: in python lists are accessed from 0 that is mylist[0] is the first element
+        # also a list of a list (such as the result of a query) has two indecies so starts with mylist[0][0]
         result = self.cur.fetchone()
         if result:
             if result[0].lower() == fname.lower() and result[1].lower() == lname.lower():
                 # now the test is done
-                print "Welcome %s %s"%(fname, lname)
+                print "Customer %d %s %s:"%(ID, fname, lname)
             # THIS IS NOT RIGHT YOU MUST PRINT OUT a listing of shipment_id,ship_date,isbn,title for this customer
             else:
                 print "The ID does not match with the name you entered"
