@@ -37,40 +37,55 @@ class DBContext:
         
         #THESE INPUT LINES  ARE NOT GOOD ENOUGH    
         # YOU NEED TO TYPE CAST/ESCAPE THESE AND CATCH EXCEPTIONS
-        CID = raw_input("cutomerID: ")
-        SID = int(input("shipment ID: "))
-        Sisbn= (raw_input("isbn: ").strip())
-        Sdate= raw_input("Ship date: ").strip()
-        # THIS IS NOT RIGHT  YOU MUST FORM A QUERY THAT HELPS
-        query ="SELECT something FROM somewhere WHERE conditions"
+        try:
+            # Try to obtain the input.
+            CID = pgdb.escape_string(raw_input("cutomerID: "))
+            SID = int(input("shipment ID: "))
+            Sisbn = pgdb.escape_string(raw_input("isbn: ").strip())
+            Sdate = pgdb.escape_string(raw_input("Ship date: ").strip())
+            # THIS IS NOT RIGHT  YOU MUST FORM A QUERY THAT HELPS
+            query = "SELECT stock FROM stock WHERE isbn='%s'" % Sisbn
+        except (NameError, ValueError, TypeError, SyntaxError) as detail:
+            print detail.message.split('\n')[0]
+            return
+
         print query
         # HERE YOU SHOULD start a transaction    
-        
-        #YOU NEED TO Catch exceptions ie bad queries
-        self.cur.execute(query)
-        #HERE YOU NEED TO USE THE RESULT OF THE QUERY TO TEST IF THER ARE 
-        #ANY BOOKS IN STOCK 
-        # YOU NEED TO CHANGE THIS TO SOMETHING REAL
-        cnt=0;
-        if cnt < 1:
-            print("No more books in stock :(")
+        try:
+            #YOU NEED TO Catch exceptions ie bad queries
+            self.cur.execute(query)
+            # HERE YOU NEED TO USE THE RESULT OF THE QUERY TO TEST IF THERE ARE
+            # ANY BOOKS IN STOCK
+            result = self.cur.fetchone()
+            if not result:
+                print("No books found with isbn '%s'" % Sisbn)
+                return
+
+            # YOU NEED TO CHANGE THIS TO SOMETHING REAL
+            cnt = result[0]
+            if cnt < 1:
+                print("No more books in stock :(")
+                return
+            else:
+                print "WE have the book in stock"
+
+            query = """UPDATE stock SET stock=stock-1 WHERE isbn='%s';"""%(Sisbn)
+            print query
+            #YOU NEED TO Catch exceptions  and rollback the transaction
+            self.cur.execute(query)
+            print "stock decremented"
+
+            query="""INSERT INTO shipments VALUES (%i, %i, '%s','%s');"""%(SID,CID,Sisbn,Sdate)
+            print query
+            #YOU NEED TO Catch exceptions and rollback the transaction
+            self.cur.execute(query)
+            print "shipment created"
+            # This ends the transaction (and starts a new one)
+            self.conn.commit()
+        except (pgdb.DatabaseError, pgdb.OperationalError):
+            print "  Exception encountered while modifying table data."
+            self.conn.rollback()
             return
-        else:
-            print "WE have the book in stock"
-            
-        query="""UPDATE stock SET stock=stock-1 WHERE isbn='%s';"""%(Sisbn)
-        print query
-        #YOU NEED TO Catch exceptions  and rollback the transaction
-        self.cur.execute(query)
-        print "stock decremented" 
-   
-        query="""INSERT INTO shipments VALUES (%i, %i, '%s','%s');"""%(SID,CID,Sisbn,Sdate)
-        print query
-        #YOU NEED TO Catch exceptions and rollback the transaction
-        self.cur.execute(query)
-        print "shipment created" 
-        # This ends the transaction (and starts a new one)    
-        self.conn.commit()        
     def showStock(self):
         query="""SELECT * FROM stock;"""
         print query
@@ -78,7 +93,7 @@ class DBContext:
             self.cur.execute(query)
         except (pgdb.DatabaseError, pgdb.OperationalError):
             print "  Exception encountered while modifying table data." 
-            self.conn.rollback ()
+            self.conn.rollback()
             return   
         self.print_answer()
     def showShipments(self):
@@ -88,7 +103,7 @@ class DBContext:
             self.cur.execute(query)
         except (pgdb.DatabaseError, pgdb.OperationalError):
             print "  Exception encountered while modifying table data." 
-            self.conn.rollback ()
+            self.conn.rollback()
             return   
         self.print_answer()
     def exit(self):    
