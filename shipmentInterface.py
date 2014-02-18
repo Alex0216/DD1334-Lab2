@@ -39,7 +39,7 @@ class DBContext:
         # YOU NEED TO TYPE CAST/ESCAPE THESE AND CATCH EXCEPTIONS
         try:
             # Try to obtain the input.
-            CID = pgdb.escape_string(raw_input("cutomerID: "))
+            CID = int(input("cutomerID: "))
             SID = int(input("shipment ID: "))
             Sisbn = pgdb.escape_string(raw_input("isbn: ").strip())
             Sdate = pgdb.escape_string(raw_input("Ship date: ").strip())
@@ -69,25 +69,25 @@ class DBContext:
             else:
                 print "WE have the book in stock"
 
-            query = """UPDATE stock SET stock=stock-1 WHERE isbn='%s';"""%(Sisbn)
+            query = """UPDATE stock SET stock=stock-1 WHERE isbn='%s';""" % Sisbn
             print query
             #YOU NEED TO Catch exceptions  and rollback the transaction
             self.cur.execute(query)
             print "stock decremented"
 
-            query="""INSERT INTO shipments VALUES (%i, %i, '%s','%s');"""%(SID,CID,Sisbn,Sdate)
+            query = """INSERT INTO shipments VALUES (%i, %i, '%s','%s');""" % (SID, CID, Sisbn, Sdate)
             print query
             #YOU NEED TO Catch exceptions and rollback the transaction
             self.cur.execute(query)
             print "shipment created"
             # This ends the transaction (and starts a new one)
             self.conn.commit()
-        except (pgdb.DatabaseError, pgdb.OperationalError):
+        except (pgdb.DatabaseError, pgdb.OperationalError) as error:
             print "  Exception encountered while modifying table data."
             self.conn.rollback()
             return
     def showStock(self):
-        query="""SELECT * FROM stock;"""
+        query = """SELECT * FROM stock;"""
         print query
         try:
             self.cur.execute(query)
