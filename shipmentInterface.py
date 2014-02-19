@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import pgdb
+import time
 from sys import argv
 
 class DBContext:
@@ -83,8 +84,9 @@ class DBContext:
             # This ends the transaction (and starts a new one)
             self.conn.commit()
         except (pgdb.DatabaseError, pgdb.OperationalError) as error:
-            print "  Exception encountered while modifying table data."
+            print "  Exception encountered while modifying table data." + error.message
             self.conn.rollback()
+            print "  Rolling back."
             return
     def showStock(self):
         query = """SELECT * FROM stock;"""
