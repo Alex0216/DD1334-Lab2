@@ -160,6 +160,7 @@ class DBContext:
             self.cur.execute(query)
         except pg.ProgrammingError as detail:
             print detail.message.split('\n')[0]
+            self.conn.rollback()
 
 
     def insert(self):
@@ -190,6 +191,7 @@ class DBContext:
             self.cur.execute(query)
         except pg.ProgrammingError as detail:
             print detail.message.split('\n')[0]
+            self.conn.rollback()
 
     def exit(self):
         self.cur.close()
